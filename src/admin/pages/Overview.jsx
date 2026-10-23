@@ -24,9 +24,12 @@ import '../overview.css'
 
 // SQL timestamps are UTC "YYYY-MM-DD HH:MM:SS".
 const sqlDate = (s) => (s ? new Date(`${s.replace(' ', 'T')}Z`) : null)
-const fmtDateTime = (s) => (s ? sqlDate(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never')
+const fmtDateTime = (s) => {
+  const d = sqlDate(s)
+  return d && !isNaN(d.getTime()) ? d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never'
+}
 const dayLabel = (day, opts = { month: 'short', day: 'numeric' }) => new Date(`${day}T00:00:00`).toLocaleDateString(undefined, opts)
-const num = (n) => n.toLocaleString()
+const num = (n) => (typeof n === 'number' ? n.toLocaleString() : Number(n || 0).toLocaleString())
 
 function ago(s) {
   const d = sqlDate(s)
