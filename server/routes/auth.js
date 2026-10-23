@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
   const result = user ? await checkPassword(user, password) : await failUnknownUser(username, password)
   if (result === 'locked') return locked(res)
   if (result !== 'ok') return res.status(401).json({ error: GENERIC })
-  createSession(res, user.id)
+  createSession(res, user.id, user.username)
   res.json({ user: { username: user.username, mustChangePassword: !!user.must_change_password } })
 })
 

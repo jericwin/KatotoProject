@@ -3,9 +3,34 @@ import { db } from './db.js'
 import { config } from './config.js'
 import { auditOnce } from './security.js'
 
-export const COOKIE = config.isProduction ? '__Host-katoto_admin' : 'katoto_admin'
+export const COOKIE = 'katoto_admin'
+export const HOST_COOKIE = '__Host-katoto_admin'
 
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex')
+const SESSION_SECRET = process.env.SESSION_SECRET || 'katoto_paete_2026_secure_session_secret_key'
+
+function signToken(userId, username, expires) {
+  const payload = Buffer.from(JSON.stringify({ u: userId, un: username, exp: expires })).toString('base64url')
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url')
+  return `${payload}.${sig}`
+}
+
+function verifyToken(token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null
+  const parts = token.split('.')
+  if (parts.length !== 2) return null
+  const [payload, sig] = parts
+  const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url')
+  if (sig.length !== expectedSig.length) return null
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'))
+    if (!data.exp || data.exp < Date.now()) return null
+    return data
+  } catch {
+    return null
+  }
+}
 
 function cookieOptions() {
   return {
@@ -17,17 +42,31 @@ function cookieOptions() {
   }
 }
 
-export function createSession(res, userId) {
-  const token = crypto.randomBytes(32).toString('base64url')
+export function createSession(res, userId, username = '') {
   const expires = Date.now() + config.sessionHours * 3600 * 1000
-  db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(sha256(token), userId, expires)
+  const token = signToken(userId, username, expires)
+  try {
+    db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(sha256(token), userId, expires)
+  } catch {
+    // If sessions table write fails in ephemeral container, signed token continues to work
+  }
   res.cookie(COOKIE, token, cookieOptions())
+  if (config.isProduction) {
+    res.cookie(HOST_COOKIE, token, cookieOptions())
+  }
 }
 
 export function destroySession(req, res) {
   const token = readCookie(req)
-  if (token) db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
+  if (token) {
+    try {
+      db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
+    } catch {
+      // Ignore in serverless
+    }
+  }
   res.clearCookie(COOKIE, { ...cookieOptions(), maxAge: undefined })
+  res.clearCookie(HOST_COOKIE, { ...cookieOptions(), maxAge: undefined })
 }
 
 function readCookie(req) {
@@ -36,7 +75,11 @@ function readCookie(req) {
   for (const part of header.split(';')) {
     const idx = part.indexOf('=')
     if (idx === -1) continue
-    if (part.slice(0, idx).trim() === COOKIE) return decodeURIComponent(part.slice(idx + 1).trim())
+    const name = part.slice(0, idx).trim()
+    if (name === COOKIE || name === HOST_COOKIE) {
+      const val = decodeURIComponent(part.slice(idx + 1).trim())
+      if (val) return val
+    }
   }
   return null
 }
@@ -45,18 +88,43 @@ function readCookie(req) {
 export function loadUser(req) {
   const token = readCookie(req)
   if (!token) return null
-  const row = db
-    .prepare(
-      `SELECT u.id, u.username, u.must_change_password AS mustChangePassword, s.expires_at AS expiresAt
-       FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND u.is_locked = 0`,
-    )
-    .get(sha256(token))
-  if (!row) return null
-  if (row.expiresAt < Date.now()) {
-    db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
+
+  // 1. Check signed HMAC token (works across all serverless containers)
+  const verified = verifyToken(token)
+  if (verified) {
+    try {
+      const row = db
+        .prepare(
+          `SELECT u.id, u.username, u.must_change_password AS mustChangePassword
+           FROM users u WHERE (u.id = ? OR u.username = ?) AND u.is_locked = 0`,
+        )
+        .get(verified.u, verified.un || '')
+      if (row) {
+        return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
+      }
+    } catch {
+      // If db read fails, fallback to verified token details
+      return { id: verified.u, username: verified.un || 'katoto', mustChangePassword: false }
+    }
+  }
+
+  // 2. Fallback to database session table
+  try {
+    const row = db
+      .prepare(
+        `SELECT u.id, u.username, u.must_change_password AS mustChangePassword, s.expires_at AS expiresAt
+         FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND u.is_locked = 0`,
+      )
+      .get(sha256(token))
+    if (!row) return null
+    if (row.expiresAt < Date.now()) {
+      db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
+      return null
+    }
+    return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
+  } catch {
     return null
   }
-  return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
 }
 
 export function requireAdmin({ allowPendingPasswordChange = false } = {}) {
