@@ -11,7 +11,7 @@ function cookieOptions() {
   return {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: 'lax',
     path: '/',
     maxAge: config.sessionHours * 3600 * 1000,
   }

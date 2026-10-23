@@ -27,9 +27,13 @@ function AuthProvider({ children }) {
 
   const refresh = useCallback(async () => {
     try {
-      const { user } = await api('/auth/me')
-      setState({ status: 'in', user })
-      return user
+      const data = await api('/auth/me')
+      if (data?.user) {
+        setState({ status: 'in', user: data.user })
+        return data.user
+      }
+      setState({ status: 'out', user: null })
+      return null
     } catch {
       setState({ status: 'out', user: null })
       return null
@@ -51,9 +55,12 @@ function AuthProvider({ children }) {
   )
 
   const login = async (username, password) => {
-    const { user } = await api('/auth/login', { method: 'POST', body: { username, password } })
-    setState({ status: 'in', user })
-    return user
+    const data = await api('/auth/login', { method: 'POST', body: { username, password } })
+    if (!data?.user) {
+      throw new Error('Invalid login response from server.')
+    }
+    setState({ status: 'in', user: data.user })
+    return data.user
   }
   const logout = async () => {
     try {

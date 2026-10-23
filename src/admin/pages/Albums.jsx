@@ -83,10 +83,10 @@ export default function Albums() {
 
       {status === 'loading' && <Loading />}
       {status === 'error' && <ErrorState error={error} onRetry={reload} />}
-      {data && data.albums.length === 0 && <p className="a-empty">No albums yet. Create one to start uploading photos.</p>}
-      {data && data.albums.length > 0 && (
+      {data && (data.albums || []).length === 0 && <p className="a-empty">No albums yet. Create one to start uploading photos.</p>}
+      {data && (data.albums || []).length > 0 && (
         <ul className="a-albums">
-          {data.albums.map((a, i) => (
+          {(data.albums || []).map((a, i) => (
             <li key={a.id} className="a-album">
               <Link to={`/admin/dashboard/albums/${a.id}`} className="a-album__link">
                 <span className="a-album__cover">
@@ -95,7 +95,7 @@ export default function Albums() {
                 <span className="a-album__text">
                   <strong>{a.title}</strong>
                   <span>
-                    {a.photos.length} photo{a.photos.length === 1 ? '' : 's'}
+                    {(a.photos || []).length} photo{(a.photos || []).length === 1 ? '' : 's'}
                   </span>
                 </span>
               </Link>
@@ -105,7 +105,7 @@ export default function Albums() {
                   <ArrowUp aria-hidden="true" />
                   <span className="visually-hidden">Move {a.title} up</span>
                 </button>
-                <button type="button" className="a-icon-btn" disabled={i === data.albums.length - 1} onClick={() => move(i, 1)}>
+                <button type="button" className="a-icon-btn" disabled={i === (data.albums || []).length - 1} onClick={() => move(i, 1)}>
                   <ArrowDown aria-hidden="true" />
                   <span className="visually-hidden">Move {a.title} down</span>
                 </button>

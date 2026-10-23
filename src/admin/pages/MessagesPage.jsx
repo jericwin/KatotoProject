@@ -65,11 +65,11 @@ export default function MessagesPage() {
             </p>
           )}
 
-          {data.messages.length === 0 ? (
+          {(data?.messages || []).length === 0 ? (
             <p className="a-empty">No messages yet. They appear here when someone uses the form in the website’s Contact section.</p>
           ) : (
             <ul className="a-msgs">
-              {data.messages.map((m) => {
+              {(data?.messages || []).map((m) => {
                 const open = openId === m.id
                 const reply = replyMail(m)
                 return (

@@ -147,7 +147,7 @@ export default function NewsPage() {
                     <ArrowUp aria-hidden="true" />
                     <span className="visually-hidden">Move “{n.title}” up</span>
                   </button>
-                  <button type="button" className="a-icon-btn" disabled={i === data.news.length - 1} onClick={() => move(i, 1)}>
+                  <button type="button" className="a-icon-btn" disabled={i === (data?.news || []).length - 1} onClick={() => move(i, 1)}>
                     <ArrowDown aria-hidden="true" />
                     <span className="visually-hidden">Move “{n.title}” down</span>
                   </button>

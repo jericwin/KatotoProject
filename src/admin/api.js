@@ -30,7 +30,14 @@ export async function api(path, { method = 'GET', body, form } = {}) {
   } catch {
     throw new ApiError('Can’t reach the server. Check your connection and try again.', { status: 0 })
   }
-  const data = res.headers.get('content-type')?.includes('application/json') ? await res.json() : {}
+  const contentType = res.headers.get('content-type') || ''
+  const isJson = contentType.includes('application/json')
+  const data = isJson ? await res.json() : {}
+
+  if (!isJson && res.ok) {
+    throw new ApiError('The server returned an unexpected non-JSON response. The API backend may not be responding.', { status: res.status })
+  }
+
   if (!res.ok) {
     const err = new ApiError(data.error || `Request failed (${res.status}).`, { status: res.status, errors: data.errors, code: data.code })
     if (res.status === 401 || data.code === 'PASSWORD_CHANGE_REQUIRED') listeners.forEach((fn) => fn(err))

@@ -182,12 +182,12 @@ export default function FoiPage() {
           onSaved={saved}
         />
       )}
-      {data && data.posts.length === 0 && editing !== 'new' && (
+      {data && (data?.posts || []).length === 0 && editing !== 'new' && (
         <p className="a-empty">Nothing posted yet. Add a financial report, audit result, or announcement.</p>
       )}
-      {data && data.posts.length > 0 && (
+      {data && (data?.posts || []).length > 0 && (
         <ul className="a-foi">
-          {data.posts.map((p) =>
+          {(data?.posts || []).map((p) =>
             editing === p.id ? (
               <li key={p.id}>
                 <FoiForm id={p.id} initial={p} meta={data} onCancel={() => setEditing(null)} onSaved={saved} />

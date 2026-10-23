@@ -37,10 +37,12 @@ function outcomeMail(r) {
 }
 function accessText(r, matches) {
   const lines = [`Information linked to ${r.email} on the Katoto Project website (${new Date().toLocaleDateString()}):`, '']
-  if (!matches.messages.length) lines.push('Contact messages: none.')
-  for (const m of matches.messages)
+  const msgs = matches?.messages || []
+  const other = matches?.otherRequests || []
+  if (!msgs.length) lines.push('Contact messages: none.')
+  for (const m of msgs)
     lines.push(`Contact message, ${fmt(m.createdAt)}`, `Name: ${m.name}`, `Email: ${m.email}`, `Topic: ${m.topic}`, `Consent: ${m.consentVersion || 'not recorded'}${m.consentedAt ? `, ${fmt(m.consentedAt)}` : ''}`, `Message: ${m.message}`, '')
-  lines.push(`Privacy requests: ${matches.otherRequests.length + 1} (including this one).`)
+  lines.push(`Privacy requests: ${other.length + 1} (including this one).`)
   lines.push('Visit statistics cannot be linked to a person, so none are included.')
   return lines.join('\n')
 }

@@ -93,11 +93,11 @@ export default function Overview() {
               <h2 id="ov-recent" className="a-h2">
                 Recent changes
               </h2>
-              {data.recent.length === 0 ? (
+              {(data?.recent || []).length === 0 ? (
                 <p className="a-muted">Nothing has been changed yet.</p>
               ) : (
                 <ol className="ov-activity">
-                  {data.recent.map((r, i) => (
+                  {(data?.recent || []).map((r, i) => (
                     <li key={i}>
                       <ActivityIcon kind={r.kind} />
                       <Link to={`/admin/dashboard/${r.to}`}>{r.text}</Link>
@@ -413,14 +413,15 @@ function DailyChart({ daily }) {
   const pad = { top: 10, right: 4, bottom: 26, left: 34 }
   const plotW = Math.max(0, width - pad.left - pad.right)
   const plotH = height - pad.top - pad.bottom
-  const max = niceMax(Math.max(...daily.map((d) => d.visitors)))
+  const list = daily || []
+  const max = niceMax(Math.max(0, ...list.map((d) => d.visitors || 0)))
   const ticks = [0, max / 2, max]
-  const slot = daily.length ? plotW / daily.length : 0
+  const slot = list.length ? plotW / list.length : 0
   const gap = slot > 8 ? 2 : 1
   const barW = Math.max(1, slot - gap)
   const y = (v) => pad.top + plotH - (v / max) * plotH
-  const labelIdx = [...new Set([0, Math.floor((daily.length - 1) / 2), daily.length - 1])]
-  const a = active == null ? null : daily[active]
+  const labelIdx = list.length ? [...new Set([0, Math.floor((list.length - 1) / 2), list.length - 1])] : []
+  const a = active == null ? null : list[active]
 
   return (
     <figure className="ov-chart">
@@ -436,7 +437,7 @@ function DailyChart({ daily }) {
                 </text>
               </g>
             ))}
-            {daily.map((d, i) => {
+            {list.map((d, i) => {
               const x = pad.left + i * slot + gap / 2
               const h = Math.max(0, (d.visitors / max) * plotH)
               const r = Math.min(4, barW / 2, h)
@@ -461,17 +462,17 @@ function DailyChart({ daily }) {
                 </g>
               )
             })}
-            {labelIdx.map((i) => (
+            {labelIdx.map((i) => list[i] ? (
               <text
                 key={i}
                 x={pad.left + i * slot + slot / 2}
                 y={height - 6}
-                textAnchor={i === 0 ? 'start' : i === daily.length - 1 ? 'end' : 'middle'}
+                textAnchor={i === 0 ? 'start' : i === list.length - 1 ? 'end' : 'middle'}
                 className="ov-chart__axis"
               >
-                {dayLabel(daily[i].day)}
+                {dayLabel(list[i].day)}
               </text>
-            ))}
+            ) : null)}
           </svg>
         )}
         {a && (

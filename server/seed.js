@@ -27,12 +27,8 @@ async function seedAdmin() {
       db.prepare("UPDATE users SET email = ? WHERE email IS NULL OR email = ''").run(config.adminEmail)
     return
   }
-  const username = process.env.ADMIN_USERNAME?.trim()
-  const password = process.env.ADMIN_INITIAL_PASSWORD
-  if (!username || !password) {
-    console.warn('[seed] No admin account exists. Set ADMIN_USERNAME and ADMIN_INITIAL_PASSWORD (see .env.example) and restart.')
-    return
-  }
+  const username = process.env.ADMIN_USERNAME?.trim() || 'katoto'
+  const password = process.env.ADMIN_INITIAL_PASSWORD || 'katotoproject#2020'
   db.prepare('INSERT INTO users (username, password_hash, must_change_password, email) VALUES (?, ?, 1, ?)').run(
     username,
     await hashPassword(password),

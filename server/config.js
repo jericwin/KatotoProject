@@ -1,14 +1,16 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+const isVercel = Boolean(process.env.VERCEL)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const isProduction = process.env.NODE_ENV === 'production' || process.argv.includes('--production')
+const isProduction = process.env.NODE_ENV === 'production' || process.argv.includes('--production') || isVercel
 // Libraries (Express included) switch off development behaviour when NODE_ENV
 // is "production"; set it here because `npm start` selects production by flag.
 if (isProduction) process.env.NODE_ENV = 'production'
-const dataDir = path.resolve(root, process.env.DATA_DIR || 'server-data')
+const defaultDataDir = isVercel ? '/tmp/server-data' : 'server-data'
+const dataDir = process.env.DATA_DIR ? path.resolve(root, process.env.DATA_DIR) : (isVercel ? '/tmp/server-data' : path.resolve(root, defaultDataDir))
 // The database and uploads must never sit inside the publicly served build.
-if (!path.relative(path.join(root, 'dist'), dataDir).startsWith('..')) {
+if (!isVercel && !path.relative(path.join(root, 'dist'), dataDir).startsWith('..')) {
   console.error('[config] REFUSING TO START: DATA_DIR is inside dist/, which is served publicly.')
   process.exit(1)
 }
@@ -17,7 +19,8 @@ if (!path.relative(path.join(root, 'dist'), dataDir).startsWith('..')) {
 // configuration, never from the request's Host header, so a forged Host can't
 // produce a malicious link. Production requires https.
 function parseBaseUrl(raw) {
-  const fallback = isProduction ? '' : 'http://localhost:5173'
+  const vercelBase = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+  const fallback = isProduction ? vercelBase : 'http://localhost:5173'
   if (!raw) return fallback
   try {
     const u = new URL(raw)
@@ -34,8 +37,9 @@ function parseBaseUrl(raw) {
 export const config = {
   root,
   isProduction,
+  isVercel,
   port: Number(process.env.PORT) || 8787,
-  trustProxy: /^\d+$/.test(process.env.TRUST_PROXY || '') ? Number(process.env.TRUST_PROXY) : process.env.TRUST_PROXY || 'loopback',
+  trustProxy: /^\d+$/.test(process.env.TRUST_PROXY || '') ? Number(process.env.TRUST_PROXY) : process.env.TRUST_PROXY || (isVercel ? 1 : 'loopback'),
   dataDir,
   uploadsDir: path.join(dataDir, 'uploads'),
   // FOI documents are kept outside /uploads and served through the API, so
