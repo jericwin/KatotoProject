@@ -35,8 +35,12 @@ export default function LoginPage() {
     if (found.password) return passRef.current?.focus()
     setBusy(true)
     try {
-      await login(username.trim(), password)
-      navigate(location.state?.from || '/admin/dashboard', { replace: true })
+      const user = await login(username.trim(), password)
+      if (user?.mustChangePassword) {
+        navigate('/admin/dashboard/account', { replace: true })
+      } else {
+        navigate(location.state?.from || '/admin/dashboard', { replace: true })
+      }
     } catch (err) {
       setFormError(err.message)
       setIsLocked(err.code === 'ACCOUNT_LOCKED')

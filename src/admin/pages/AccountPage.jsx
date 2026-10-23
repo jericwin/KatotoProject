@@ -67,7 +67,7 @@ function ChangePassword({ data, reload }) {
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }))
-  const pending = data.pending.find((p) => p.purpose === 'password_change')
+  const pending = (data?.pending || []).find((p) => p.purpose === 'password_change')
 
   const submit = async (e) => {
     e.preventDefault()
@@ -275,11 +275,11 @@ export default function AccountPage() {
           Security log
         </h2>
         <p className="a-muted">The last 100 events. No passwords, links, or IP addresses are recorded. Entries are deleted after {data.retentionDays} days.</p>
-        {data.events.length === 0 ? (
+        {(data?.events || []).length === 0 ? (
           <p className="a-empty">No security events yet.</p>
         ) : (
           <ol className="a-pr-log a-sec-log">
-            {data.events.map((e) => (
+            {(data?.events || []).map((e) => (
               <li key={e.id} className={WARN_EVENTS.test(e.event) ? 'is-warn' : ''}>
                 <time>{fmt(e.at)}</time>
                 <span>
@@ -297,11 +297,11 @@ export default function AccountPage() {
           Recent admin changes
         </h2>
         <p className="a-muted">The last 50 changes made in the admin (the action only, not the content).</p>
-        {data.activity.length === 0 ? (
+        {(data?.activity || []).length === 0 ? (
           <p className="a-empty">No changes recorded yet.</p>
         ) : (
           <ol className="a-pr-log">
-            {data.activity.map((e) => (
+            {(data?.activity || []).map((e) => (
               <li key={e.id}>
                 <time>{fmt(e.at)}</time>
                 <span>
