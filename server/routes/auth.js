@@ -336,13 +336,21 @@ router.delete('/pending/:purpose', requireAdmin({ allowPendingPasswordChange: tr
 
 // --- Account & security page -------------------------------------------------------
 router.get('/security', requireAdmin({ allowPendingPasswordChange: true }), (req, res) => {
-  const u = db
+  let u = db
     .prepare(
       `SELECT username, email, failed_login_attempts AS failedAttempts, is_locked AS isLocked, locked_at AS lockedAt,
               last_failed_login_at AS lastFailedAt, password_changed_at AS passwordChangedAt, must_change_password AS mustChange
        FROM users WHERE id = ?`,
     )
     .get(req.user.id)
+  if (!u) {
+    u = { username: req.user.username || 'katoto', email: config.adminEmail || '', failedAttempts: 0, mustChange: 0 }
+  } else if (!u.email && config.adminEmail) {
+    try {
+      db.prepare('UPDATE users SET email = ? WHERE id = ?').run(config.adminEmail, req.user.id)
+      u.email = config.adminEmail
+    } catch {}
+  }
   const pending = db
     .prepare(
       `SELECT purpose, payload, expires_at AS expiresAt FROM auth_tokens

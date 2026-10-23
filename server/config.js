@@ -21,18 +21,26 @@ if (!isVercel && !path.relative(path.join(root, 'dist'), dataDir).startsWith('..
 // configuration, never from the request's Host header, so a forged Host can't
 // produce a malicious link. Production requires https.
 function parseBaseUrl(raw) {
-  const vercelBase = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
-  const fallback = isProduction ? vercelBase : 'http://localhost:5173'
-  if (!raw) return fallback
+  let val = raw ? String(raw).trim() : ''
+  if (isVercel && (!val || val.includes('localhost') || val.startsWith('http://'))) {
+    val = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'https://katoto-project.vercel.app'
+  }
+  const fallback = isProduction ? (isVercel ? 'https://katoto-project.vercel.app' : '') : 'http://localhost:5173'
+  if (!val) return fallback
   try {
-    const u = new URL(raw)
+    const u = new URL(val.startsWith('http://') || val.startsWith('https://') ? val : `https://${val}`)
     const local = ['localhost', '127.0.0.1'].includes(u.hostname)
-    if (u.protocol !== 'https:' && !(u.protocol === 'http:' && local && !isProduction)) throw new Error('must use https')
+    if (u.protocol !== 'https:' && !(u.protocol === 'http:' && local && !isProduction)) {
+      if (isVercel) return 'https://katoto-project.vercel.app'
+      throw new Error('must use https')
+    }
     if (u.username || u.password || u.search || u.hash) throw new Error('must be a plain origin')
     return u.origin + u.pathname.replace(/\/+$/, '')
   } catch (err) {
     console.error(`[config] APP_BASE_URL is invalid (${err.message}); emailed links are disabled.`)
-    return ''
+    return isVercel ? 'https://katoto-project.vercel.app' : ''
   }
 }
 
