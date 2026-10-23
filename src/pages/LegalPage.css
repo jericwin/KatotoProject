@@ -57,6 +57,11 @@
   padding: 0.2rem 0;
   break-inside: avoid;
 }
+@media (max-width: 640px) {
+  .legal__toc ol {
+    columns: 1;
+  }
+}
 
 .legal__body {
   display: grid;
@@ -109,6 +114,16 @@
   min-width: 640px;
   border-collapse: collapse;
   font-size: 0.93rem;
+}
+@media (max-width: 640px) {
+  .legal__table-wrap table {
+    min-width: 100%;
+    font-size: 0.85rem;
+  }
+  .legal__table-wrap th,
+  .legal__table-wrap td {
+    padding: 0.5rem 0.7rem;
+  }
 }
 .legal__table-wrap caption {
   padding: 0.75rem 1rem 0;
