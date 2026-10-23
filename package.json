@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "engines": {
-    "node": ">=24.7"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
@@ -23,6 +23,7 @@
     "@fontsource-variable/figtree": "^5.3.0",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
+    "@libsql/client": "0.18.0",
     "express": "^5.3.0",
     "helmet": "^8.3.0",
     "lucide-react": "^1.61.0",
