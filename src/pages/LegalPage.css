@@ -1,12 +1,11 @@
 .legal {
   padding-block: clamp(1.5rem, 5vw, 5rem) clamp(2rem, 6vw, 6rem);
-  padding-inline: 1rem;
 }
 .legal__inner {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 2rem);
   max-width: 920px;
-  margin: 0 auto;
 }
 .legal__head h1 {
   font-size: clamp(1.8rem, 5vw, 3.6rem);
@@ -68,6 +67,7 @@
 
 .legal__body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.5rem, 5vw, 2.5rem);
 }
 .legal__section {
@@ -87,8 +87,7 @@
 .legal__section li {
   color: var(--ink-2);
   max-width: 44rem;
-  font-size: clamp(0.9rem, 1.8vw, 1rem);
-  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 .legal__section p + p,
 .legal__section p + ul,
@@ -122,7 +121,7 @@
 }
 @media (max-width: 768px) {
   .legal__table-wrap table {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
   .legal__table-wrap th,
   .legal__table-wrap td {
@@ -130,23 +129,13 @@
   }
 }
 @media (max-width: 520px) {
-  .legal__table-wrap {
-    margin-left: -1rem;
-    margin-right: -1rem;
-    border-left: 0;
-    border-right: 0;
-    border-radius: 0;
-  }
   .legal__table-wrap table {
-    min-width: 100%;
-    font-size: 0.75rem;
+    min-width: 560px;
+    font-size: 0.82rem;
   }
   .legal__table-wrap th,
   .legal__table-wrap td {
-    padding: 0.4rem 0.6rem;
-  }
-  .legal__table-wrap thead th {
-    font-size: 0.7rem;
+    padding: 0.5rem 0.65rem;
   }
 }
 .legal__table-wrap caption {
