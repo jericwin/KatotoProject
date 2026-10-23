@@ -1,13 +1,15 @@
 .legal {
-  padding-block: clamp(2.5rem, 7vw, 5rem) clamp(3.5rem, 8vw, 6rem);
+  padding-block: clamp(1.5rem, 5vw, 5rem) clamp(2rem, 6vw, 6rem);
+  padding-inline: 1rem;
 }
 .legal__inner {
   display: grid;
-  gap: 2rem;
+  gap: clamp(1.5rem, 4vw, 2rem);
   max-width: 920px;
+  margin: 0 auto;
 }
 .legal__head h1 {
-  font-size: clamp(2.3rem, 6vw, 3.6rem);
+  font-size: clamp(1.8rem, 5vw, 3.6rem);
   line-height: 1.05;
   margin: 0.4rem 0 0.6rem;
 }
@@ -24,7 +26,7 @@
 }
 .legal__intro {
   margin-top: 1.25rem;
-  font-size: 1.12rem;
+  font-size: clamp(0.95rem, 2vw, 1.12rem);
   color: var(--ink-2);
   max-width: 44rem;
 }
@@ -33,7 +35,7 @@
 }
 
 .legal__toc {
-  padding: 1.1rem 1.3rem;
+  padding: clamp(0.9rem, 3vw, 1.3rem);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fff;
@@ -57,44 +59,47 @@
   padding: 0.2rem 0;
   break-inside: avoid;
 }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .legal__toc ol {
     columns: 1;
+    padding-left: 1.1rem;
   }
 }
 
 .legal__body {
   display: grid;
-  gap: 2.5rem;
+  gap: clamp(1.5rem, 5vw, 2.5rem);
 }
 .legal__section {
   scroll-margin-top: calc(var(--header-h) + 16px);
 }
 .legal__section h2 {
-  font-size: clamp(1.5rem, 3vw, 1.9rem);
-  margin-bottom: 0.75rem;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
 }
 .legal__section h3 {
   font-family: var(--font-body);
-  font-size: 1.08rem;
+  font-size: clamp(0.95rem, 2vw, 1.08rem);
   font-weight: 700;
-  margin: 1.25rem 0 0.4rem;
+  margin: clamp(0.8rem, 3vw, 1.25rem) 0 0.4rem;
 }
 .legal__section p,
 .legal__section li {
   color: var(--ink-2);
   max-width: 44rem;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  line-height: 1.6;
 }
 .legal__section p + p,
 .legal__section p + ul,
 .legal__section ul + p,
 .legal__section p + .legal__table-wrap,
 .legal__section .legal__table-wrap + p {
-  margin-top: 0.75rem;
+  margin-top: clamp(0.5rem, 2vw, 0.75rem);
 }
 .legal__section ul,
 .legal__section ol {
-  padding-left: 1.3rem;
+  padding-left: clamp(1rem, 3vw, 1.3rem);
   display: grid;
   gap: 0.35rem;
 }
@@ -115,14 +120,33 @@
   border-collapse: collapse;
   font-size: 0.93rem;
 }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .legal__table-wrap table {
-    min-width: 100%;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   .legal__table-wrap th,
   .legal__table-wrap td {
-    padding: 0.5rem 0.7rem;
+    padding: 0.6rem 0.8rem;
+  }
+}
+@media (max-width: 520px) {
+  .legal__table-wrap {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+  .legal__table-wrap table {
+    min-width: 100%;
+    font-size: 0.75rem;
+  }
+  .legal__table-wrap th,
+  .legal__table-wrap td {
+    padding: 0.4rem 0.6rem;
+  }
+  .legal__table-wrap thead th {
+    font-size: 0.7rem;
   }
 }
 .legal__table-wrap caption {
