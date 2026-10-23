@@ -6,7 +6,13 @@ import { config } from './config.js'
 // Readable only by the account that runs the server (no effect on Windows).
 for (const dir of [config.dataDir, config.uploadsDir, config.documentsDir]) {
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 })
-  if (process.platform !== 'win32') fs.chmodSync(dir, 0o700)
+  if (process.platform !== 'win32') {
+    try {
+      fs.chmodSync(dir, 0o700)
+    } catch {
+      // Ignore permission warnings in containerized environments
+    }
+  }
 }
 
 export const db = new DatabaseSync(path.join(config.dataDir, 'katoto.db'))

@@ -8,7 +8,9 @@ const isProduction = process.env.NODE_ENV === 'production' || process.argv.inclu
 // is "production"; set it here because `npm start` selects production by flag.
 if (isProduction) process.env.NODE_ENV = 'production'
 const defaultDataDir = isVercel ? '/tmp/server-data' : 'server-data'
-const dataDir = process.env.DATA_DIR ? path.resolve(root, process.env.DATA_DIR) : (isVercel ? '/tmp/server-data' : path.resolve(root, defaultDataDir))
+const dataDir = isVercel
+  ? (process.env.DATA_DIR && process.env.DATA_DIR.startsWith('/tmp') ? process.env.DATA_DIR : '/tmp/server-data')
+  : (process.env.DATA_DIR ? path.resolve(root, process.env.DATA_DIR) : path.resolve(root, defaultDataDir))
 // The database and uploads must never sit inside the publicly served build.
 if (!isVercel && !path.relative(path.join(root, 'dist'), dataDir).startsWith('..')) {
   console.error('[config] REFUSING TO START: DATA_DIR is inside dist/, which is served publicly.')
