@@ -57,8 +57,8 @@ export function createSession(res, userId, username = '') {
 }
 
 export function destroySession(req, res) {
-  const token = readCookie(req)
-  if (token) {
+  const tokens = readCookies(req)
+  for (const token of tokens) {
     try {
       db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
     } catch {
@@ -69,62 +69,73 @@ export function destroySession(req, res) {
   res.clearCookie(HOST_COOKIE, { ...cookieOptions(), maxAge: undefined })
 }
 
-function readCookie(req) {
+function readCookies(req) {
   const header = req.headers.cookie
-  if (!header) return null
+  if (!header) return []
+  const tokens = []
   for (const part of header.split(';')) {
     const idx = part.indexOf('=')
     if (idx === -1) continue
     const name = part.slice(0, idx).trim()
     if (name === COOKIE || name === HOST_COOKIE) {
       const val = decodeURIComponent(part.slice(idx + 1).trim())
-      if (val) return val
+      if (val) tokens.push(val)
     }
   }
-  return null
+  return tokens
 }
 
 // Attaches req.user when a valid session cookie is present.
 export function loadUser(req) {
-  const token = readCookie(req)
-  if (!token) return null
+  const tokens = readCookies(req)
+  if (tokens.length === 0) return null
 
-  // 1. Check signed HMAC token (works across all serverless containers)
-  const verified = verifyToken(token)
-  if (verified) {
-    try {
-      const row = db
-        .prepare(
-          `SELECT u.id, u.username, u.must_change_password AS mustChangePassword
-           FROM users u WHERE (u.id = ? OR u.username = ?) AND u.is_locked = 0`,
-        )
-        .get(verified.u, verified.un || '')
-      if (row) {
-        return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
+  // 1. Check signed HMAC token first (works seamlessly across all serverless containers)
+  for (const token of tokens) {
+    const verified = verifyToken(token)
+    if (verified) {
+      try {
+        const row = db
+          .prepare(
+            `SELECT u.id, u.username, u.must_change_password AS mustChangePassword, u.is_locked AS isLocked
+             FROM users u WHERE (u.id = ? OR u.username = ?)`,
+          )
+          .get(verified.u, verified.un || '')
+        if (row) {
+          if (row.isLocked) return null
+          return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
+        }
+      } catch {
+        // If db read fails, fallback to verified token details
       }
-    } catch {
-      // If db read fails, fallback to verified token details
       return { id: verified.u, username: verified.un || 'katoto', mustChangePassword: false }
     }
   }
 
-  // 2. Fallback to database session table
-  try {
-    const row = db
-      .prepare(
-        `SELECT u.id, u.username, u.must_change_password AS mustChangePassword, s.expires_at AS expiresAt
-         FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND u.is_locked = 0`,
-      )
-      .get(sha256(token))
-    if (!row) return null
-    if (row.expiresAt < Date.now()) {
-      db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
-      return null
+  // 2. Fallback to database session table for legacy or un-signed tokens
+  for (const token of tokens) {
+    try {
+      const row = db
+        .prepare(
+          `SELECT u.id, u.username, u.must_change_password AS mustChangePassword, s.expires_at AS expiresAt
+           FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND u.is_locked = 0`,
+        )
+        .get(sha256(token))
+      if (row) {
+        if (row.expiresAt < Date.now()) {
+          try {
+            db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token))
+          } catch {}
+          continue
+        }
+        return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
+      }
+    } catch {
+      // Ignore db errors
     }
-    return { id: row.id, username: row.username, mustChangePassword: !!row.mustChangePassword }
-  } catch {
-    return null
   }
+
+  return null
 }
 
 export function requireAdmin({ allowPendingPasswordChange = false } = {}) {
