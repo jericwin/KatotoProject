@@ -1,0 +1,42 @@
+.section-header {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+@media (min-width: 900px) {
+  .section-header--split {
+    grid-template-columns: 1fr 3fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .section-header--split .section-header__label {
+    padding-top: 0.9rem;
+  }
+}
+
+.section-header__rule {
+  display: inline-block;
+  width: 2.25rem;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.section-header__intro {
+  margin-top: 1.25rem;
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+  color: var(--ink-2);
+  max-width: 40rem;
+}
+
+.section-header--dark .eyebrow,
+.section-header--dark .eyebrow-num {
+  color: rgb(255 255 255 / 0.75);
+}
+.section-header--dark .section-title {
+  color: #fff;
+}
+.section-header--dark .section-header__intro {
+  color: rgb(255 255 255 / 0.78);
+}

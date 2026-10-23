@@ -1,0 +1,29 @@
+node_modules
+dist
+*.log
+
+# Secrets: environment files (except the placeholder template), keys, certificates
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+
+# Runtime data: database, uploads, FOI documents, backups (personal data)
+server-data
+backups
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Organization's original source files, kept privately (the profile PDF
+# includes the member masterlist). The site uses the processed copies in
+# src/assets and public/; scripts/prepare_assets.py needs these originals.
+/Katoto Project Profile 2026 .pdf
+/*.jpeg
+/logo.jpg

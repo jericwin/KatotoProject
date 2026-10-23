@@ -1,0 +1,211 @@
+.about__story {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .about__story {
+    grid-template-columns: 1fr 3fr;
+    gap: 3rem;
+  }
+}
+
+.about__emblem img {
+  width: min(100%, 240px);
+  height: auto;
+}
+.about__emblem-caption {
+  margin-top: 0.9rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 16rem;
+}
+
+.about__text {
+  display: grid;
+  gap: 1.25rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  line-height: 1.55;
+  max-width: 46rem;
+}
+@media (min-width: 1100px) {
+  .about__text {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    font-size: 1.15rem;
+  }
+}
+
+/* Pull quote -------------------------------------------------------------- */
+.about__quote {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(1.25rem, 4vw, 3rem);
+  margin-block: clamp(4rem, 9vw, 7rem);
+  align-items: stretch;
+}
+.about__quote-mosaic {
+  width: clamp(18px, 3vw, 36px);
+  height: 100%;
+}
+.about__quote blockquote {
+  margin: 0;
+}
+.about__quote p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 450;
+  font-size: clamp(1.8rem, 4.6vw, 3.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  max-width: 22ch;
+}
+@media (min-width: 900px) {
+  .about__quote {
+    margin-left: calc(25% + 0.75rem);
+  }
+}
+.about__quote footer {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+}
+.about__quote footer span {
+  font-size: 1.1rem;
+  color: var(--ink-2);
+}
+.about__quote cite {
+  font-style: normal;
+  font-family: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Vision & mission ------------------------------------------------------- */
+.about__statements {
+  display: grid;
+  gap: 1.5rem;
+}
+@media (min-width: 900px) {
+  .about__statements {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+.statement {
+  height: 100%;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 6px solid var(--accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.statement__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.statement h3 {
+  display: grid;
+  gap: 0.25rem;
+}
+.statement__en {
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+}
+.statement__fil {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.statement__body {
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.lang-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+}
+.lang-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 0.4rem 0.85rem;
+  min-height: 36px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.lang-toggle button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Objectives ------------------------------------------------------------- */
+.about__objectives {
+  margin-top: clamp(4rem, 8vw, 6rem);
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 900px) {
+  .about__objectives {
+    grid-template-columns: 1fr 3fr;
+    gap: 3rem;
+  }
+}
+.about__objectives-head h3 {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+.about__objectives-head p {
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.objectives {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  column-gap: 2.5rem;
+  border-top: 2px solid var(--ink);
+}
+@media (min-width: 700px) {
+  .objectives {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.objectives li {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.12rem;
+  font-weight: 550;
+}
+.objectives__letter {
+  flex: none;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--k-purple);
+  width: 1.2rem;
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Katoto Project website backup
+
+[Service]
+Type=oneshot
+User=katoto
+Group=katoto
+WorkingDirectory=/opt/katoto
+EnvironmentFile=/etc/katoto/katoto.env
+ExecStart=/usr/bin/node scripts/backup.js
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/katoto /var/backups/katoto
+UMask=0077

@@ -1,0 +1,42 @@
+{
+  "name": "katoto-project-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.7"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --env-file-if-exists=.env --watch server/index.js",
+    "dev:web": "vite",
+    "build": "vite build",
+    "start": "node --env-file-if-exists=.env server/index.js --production",
+    "preview": "vite preview",
+    "assets": "python scripts/prepare_assets.py",
+    "admin:password": "node --env-file-if-exists=.env scripts/set-admin-password.js",
+    "backup": "node --env-file-if-exists=.env scripts/backup.js",
+    "security:secrets": "node scripts/scan-secrets.js",
+    "security:audit": "npm audit --omit=dev && npm audit && node scripts/scan-secrets.js"
+  },
+  "dependencies": {
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "lucide-react": "^1.61.0",
+    "motion": "^14.6.0",
+    "multer": "^2.5.0",
+    "nodemailer": "10.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "vite": "^8.3.5"
+  }
+}

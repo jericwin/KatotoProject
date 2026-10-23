@@ -1,0 +1,302 @@
+/* ---------------------------------------------------------------------------
+   Tokens — colors sampled from the Katoto logo (the five figures) and the
+   turquoise / orange used on Katoto's letterhead and announcements.
+--------------------------------------------------------------------------- */
+:root {
+  --k-red: #e11d3c;
+  --k-yellow: #f7c316;
+  --k-purple: #57256b;
+  --k-blue: #136fb2;
+  --k-green: #16a04b;
+  --k-teal: #34b9cf;
+  --k-orange: #ee7d22;
+
+  --paper: #fbf7ef;
+  --paper-2: #f3ecdf;
+  --paper-3: #eae0cf;
+  --ink: #1f1530;
+  --ink-2: #3f3550;
+  --muted: #655b72;
+  --line: #ddd2c0;
+  --night: #24143a;
+  --night-2: #2f1c49;
+
+  --font-display: 'Fraunces Variable', 'Georgia', serif;
+  --font-body: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-label: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --max: 1240px;
+  --header-h: 72px;
+  --radius: 6px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 12px);
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--k-blue);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--k-yellow);
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------------
+   Layout helpers
+--------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: clamp(4.5rem, 10vw, 8.5rem);
+  position: relative;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared type
+--------------------------------------------------------------------------- */
+.eyebrow {
+  font-family: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.9rem;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.eyebrow-num {
+  color: var(--ink);
+}
+
+.section-title {
+  font-size: clamp(2.2rem, 5.2vw, 4rem);
+}
+
+.lede {
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  color: var(--ink-2);
+  max-width: 38rem;
+}
+
+.fil {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons
+--------------------------------------------------------------------------- */
+.btn {
+  --btn-bg: var(--k-purple);
+  --btn-fg: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0.8rem 1.35rem;
+  border-radius: 999px;
+  border: 2px solid var(--btn-bg);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: 650;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--ease),
+    background-color 0.2s,
+    color 0.2s,
+    box-shadow 0.25s;
+  white-space: nowrap;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -10px rgb(31 21 48 / 0.55);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--ink);
+  border-color: currentColor;
+}
+.btn-ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.btn-light {
+  --btn-bg: var(--paper);
+  --btn-fg: var(--ink);
+}
+
+.btn-yellow {
+  --btn-bg: var(--k-yellow);
+  --btn-fg: var(--ink);
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--k-yellow);
+  transition: text-decoration-color 0.2s;
+}
+.text-link:hover {
+  text-decoration-color: currentColor;
+}
+.text-link svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* ---------------------------------------------------------------------------
+   Admin preview banner (shown on the public site in preview mode)
+--------------------------------------------------------------------------- */
+.preview-banner {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.8rem;
+  padding: 0.55rem var(--gutter);
+  background: var(--k-orange);
+  color: var(--ink);
+  font-size: 0.92rem;
+  text-align: center;
+}
+.preview-banner strong {
+  font-family: var(--font-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.preview-banner a {
+  font-weight: 700;
+}
+
+.admin-boot {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  color: var(--muted);
+}

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily backup of the Katoto Project website
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,148 @@
+.site-footer {
+  background: var(--night);
+  color: rgb(255 255 255 / 0.85);
+}
+.site-footer__mosaic {
+  display: block;
+  width: 100%;
+  height: 12px;
+}
+
+.site-footer__grid {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: clamp(3.5rem, 7vw, 5rem);
+}
+@media (min-width: 800px) {
+  .site-footer__grid {
+    grid-template-columns: 1.5fr 1fr 1.2fr;
+    gap: 3rem;
+  }
+}
+
+/* Logo on a turquoise disc, as on Katoto's letterhead. */
+.site-footer__seal {
+  margin: 10px;
+  display: grid;
+  place-items: center;
+  width: 190px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 10px #5cc6d8;
+}
+.site-footer__seal img {
+  width: 128px;
+  height: auto;
+}
+
+.site-footer__tagline {
+  margin-top: 1.25rem;
+  font-family: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.site-footer__small {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+  color: rgb(255 255 255 / 0.65);
+}
+
+.site-footer h2 {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--k-yellow);
+  margin-bottom: 1rem;
+}
+.site-footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.site-footer li {
+  overflow-wrap: anywhere;
+}
+.site-footer a {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.site-footer__fb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.site-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  background: linear-gradient(rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.14)) top center / calc(100% - 2 * var(--gutter)) 1px
+    no-repeat;
+  font-size: 0.88rem;
+  color: rgb(255 255 255 / 0.6);
+}
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.site-footer__top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+}
+.site-footer__top svg {
+  width: 1rem;
+  height: 1rem;
+}
+.site-footer :focus-visible {
+  outline-color: var(--k-yellow);
+}
+.site-footer__legal {
+  padding-block: 1.25rem 0.5rem;
+}
+.site-footer__legal ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+}
+.site-footer__legal a,
+.site-footer__settings {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgb(255 255 255 / 0.85);
+  font: inherit;
+  font-size: 0.92rem;
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.35);
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.site-footer__legal a:hover,
+.site-footer__settings:hover {
+  color: #fff;
+  text-decoration-color: currentColor;
+}

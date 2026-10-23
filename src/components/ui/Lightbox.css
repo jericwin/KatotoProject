@@ -1,0 +1,120 @@
+.lightbox {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+}
+.lightbox::backdrop {
+  background: rgb(20 12 32 / 0.9);
+  backdrop-filter: blur(4px);
+}
+.lightbox[open] {
+  display: grid;
+  place-items: center;
+  animation: lightbox-in 0.3s var(--ease);
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.lightbox__frame {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 4.5rem 1rem 1.5rem;
+  max-width: 100%;
+}
+
+.lightbox__figure {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+.lightbox__figure img {
+  animation: lightbox-in 0.35s var(--ease);
+}
+/* The activity photos exist only at ~180px, so cap their enlargement to keep
+   them sharp enough. */
+.lightbox__figure--photo img {
+  width: min(78vw, 380px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 6px solid var(--ring, #fff);
+  background: var(--paper-2);
+}
+.lightbox__figure--image img {
+  max-width: min(94vw, 1500px);
+  max-height: calc(100svh - 12rem);
+  min-width: min(78vw, 340px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.lightbox__figure--document img {
+  max-width: min(92vw, 1100px);
+  max-height: calc(100svh - 12rem);
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+  background: #fff;
+}
+.lightbox__figure figcaption {
+  display: grid;
+  gap: 0.2rem;
+  text-align: center;
+  max-width: 36rem;
+}
+.lightbox__figure figcaption strong {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.lightbox__figure figcaption span {
+  color: rgb(255 255 255 / 0.78);
+  font-size: 0.95rem;
+}
+.lightbox__count {
+  font-family: var(--font-label);
+  letter-spacing: 0.12em;
+}
+
+.lightbox__close,
+.lightbox__nav button {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.lightbox__close:hover,
+.lightbox__nav button:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+.lightbox__close:focus-visible,
+.lightbox__nav button:focus-visible {
+  outline-color: var(--k-yellow);
+}
+.lightbox__close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+}
+.lightbox__nav {
+  display: flex;
+  gap: 0.75rem;
+}

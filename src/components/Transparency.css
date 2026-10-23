@@ -1,0 +1,149 @@
+.foi {
+  background: var(--paper-2);
+}
+
+.foi__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.foi__filters button {
+  min-height: 44px;
+  padding: 0.4rem 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-2);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+.foi__filters button:hover {
+  border-color: var(--ink);
+}
+.foi__filters button[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.foi__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 900px) {
+  .foi__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.foi__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--k-blue);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.foi__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.foi__tag {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--k-blue);
+}
+.foi__item h3 {
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  line-height: 1.2;
+}
+.foi__body {
+  color: var(--ink-2);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.foi__file {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: auto;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.foi__file:hover {
+  border-color: var(--ink);
+  background: #fff;
+}
+.foi__file svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+.foi__file .foi__file-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--k-blue);
+}
+.foi__file-text {
+  display: grid;
+  min-width: 0;
+}
+.foi__file-text span {
+  font-size: 0.85rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.foi__more {
+  margin-top: 1.5rem;
+}
+
+.foi__empty {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 2rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--ink-2);
+}
+.foi__empty svg {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  color: var(--k-blue);
+}
+
+.foi__request {
+  margin-top: 2rem;
+  max-width: 48rem;
+  color: var(--ink-2);
+}
+.foi__request a {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

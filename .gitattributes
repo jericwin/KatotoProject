@@ -1,0 +1,9 @@
+# Unix line endings everywhere (shell scripts and systemd units break with CRLF).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff2 binary

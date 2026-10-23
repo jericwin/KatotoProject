@@ -1,0 +1,115 @@
+.join {
+  background: var(--paper-2);
+}
+
+.join__tag {
+  color: var(--k-purple);
+  font-size: 0.82rem;
+}
+.join__tag svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Paths ------------------------------------------------------------------ */
+.join__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: 1.75rem;
+}
+
+.join__paths {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+@media (min-width: 900px) {
+  .join__paths {
+    grid-template-columns: 1.25fr 1fr 1fr;
+  }
+  .join__paths--two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.join__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #fff;
+}
+.join__card h3 {
+  font-size: clamp(1.6rem, 2.6vw, 2.05rem);
+}
+.join__card > p:not(.eyebrow) {
+  color: var(--ink-2);
+}
+.join__card .text-link {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+.join__card .join__actions {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.join__card--katuwang {
+  border-top: 6px solid var(--k-green);
+}
+
+.join__card--give {
+  background: var(--k-purple);
+  color: #fff;
+  border-color: var(--k-purple);
+}
+.join__card--give .join__tag {
+  color: var(--k-yellow);
+}
+.join__gcash {
+  margin: 0.25rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.join__gcash dt {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.7);
+}
+.join__gcash dd {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.join__card--give .join__actions {
+  margin-top: 0.25rem;
+  padding-top: 0;
+}
+.join__card--give > p.join__fineprint {
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.join__card--share {
+  border-top: 6px solid var(--k-teal);
+}
+.join__status {
+  flex-basis: 100%;
+  font-size: 0.9rem;
+  color: var(--k-green);
+  font-weight: 600;
+  min-height: 0;
+}
+.join__status:empty {
+  display: none;
+}

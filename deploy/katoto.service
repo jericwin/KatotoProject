@@ -1,0 +1,29 @@
+[Unit]
+Description=Katoto Project website
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=katoto
+Group=katoto
+WorkingDirectory=/opt/katoto
+EnvironmentFile=/etc/katoto/katoto.env
+ExecStart=/usr/bin/node server/index.js --production
+Restart=on-failure
+RestartSec=5
+
+# Hardening: the app can write only to its data and backup folders.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/katoto /var/backups/katoto
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

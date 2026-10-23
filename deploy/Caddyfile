@@ -1,0 +1,8 @@
+# Installed by setup.sh as /etc/caddy/Caddyfile. Caddy obtains and renews the
+# HTTPS certificate automatically and redirects http:// to https://.
+__DOMAIN__ {
+	encode zstd gzip
+	# Don't advertise the server software.
+	header -Server
+	reverse_proxy 127.0.0.1:8787
+}
