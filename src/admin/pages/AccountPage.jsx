@@ -81,7 +81,7 @@ function ChangePassword({ data, reload }) {
     try {
       const res = await api('/auth/password', { method: 'POST', body: { currentPassword: form.currentPassword, newPassword: form.newPassword } })
       setForm({ currentPassword: '', newPassword: '', confirm: '' })
-      toast(`Verification email sent to ${res.sentTo}. Open the link to finish.`)
+      toast(res.sentTo ? `Verification email sent to ${res.sentTo}. Open the link to finish.` : (res.message || 'Password changed.'))
       reload()
     } catch (err) {
       setErrors(err.errors || {})

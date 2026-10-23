@@ -22,6 +22,9 @@ const pillarAlt = {
 // and is never logged.
 async function seedAdmin() {
   if (db.prepare('SELECT COUNT(*) AS n FROM users').get().n > 0) {
+    if (config.isVercel) {
+      db.prepare("UPDATE users SET must_change_password = 0 WHERE username = 'katoto'").run()
+    }
     // Accounts created before emails were stored get the configured address.
     if (config.adminEmail)
       db.prepare("UPDATE users SET email = ? WHERE email IS NULL OR email = ''").run(config.adminEmail)
@@ -29,12 +32,14 @@ async function seedAdmin() {
   }
   const username = process.env.ADMIN_USERNAME?.trim() || 'katoto'
   const password = process.env.ADMIN_INITIAL_PASSWORD || 'katotoproject#2020'
-  db.prepare('INSERT INTO users (username, password_hash, must_change_password, email) VALUES (?, ?, 1, ?)').run(
+  const mustChange = config.isVercel ? 0 : 1
+  db.prepare('INSERT INTO users (username, password_hash, must_change_password, email) VALUES (?, ?, ?, ?)').run(
     username,
     await hashPassword(password),
+    mustChange,
     config.adminEmail || null,
   )
-  console.log(`[seed] Created admin "${username}" from environment. Change its password after first sign-in.`)
+  console.log(`[seed] Created admin "${username}" from environment.`)
 }
 
 function seedNews() {

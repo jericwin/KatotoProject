@@ -222,13 +222,21 @@ async function sendVerification(req, res, purpose, payload, { what, summary }) {
 }
 
 router.post('/password', requireAdmin({ allowPendingPasswordChange: true }), async (req, res) => {
-  if (!emailReady()) return res.status(503).json({ error: EMAIL_UNAVAILABLE })
   const { newPassword, currentPassword } = req.body || {}
   const problem = validateNewPassword(newPassword, req.user.username)
   if (problem) return res.status(400).json({ error: problem, errors: { newPassword: problem } })
   if (newPassword === currentPassword)
     return res.status(400).json({ error: 'Choose a different password.', errors: { newPassword: 'Must differ from the current password.' } })
   if (!(await reauthenticate(req, res))) return
+
+  if (!emailReady()) {
+    const hash = await hashPassword(newPassword)
+    db.prepare("UPDATE users SET password_hash = ?, must_change_password = 0, password_changed_at = datetime('now'), failed_login_attempts = 0 WHERE id = ?").run(hash, req.user.id)
+    destroySession(req, res)
+    audit(req.user.id, 'password_changed', 'Password changed directly (email service not configured); all sessions signed out')
+    return res.json({ changed: true, message: 'Password changed successfully. Please sign in with your new password.' })
+  }
+
   // Only the hash of the proposed password is kept while waiting for verification.
   await sendVerification(req, res, PURPOSES.password, await hashPassword(newPassword), {
     what: 'the new admin password',
