@@ -21,7 +21,7 @@ const BOT = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebo
 const dayFormat = new Intl.DateTimeFormat('en-CA', { timeZone: config.timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })
 export const dayOf = (date = new Date()) => dayFormat.format(date) // YYYY-MM-DD
 
-function shiftDay(day, delta) {
+export function shiftDay(day, delta) {
   const d = new Date(`${day}T12:00:00Z`)
   d.setUTCDate(d.getUTCDate() + delta)
   return d.toISOString().slice(0, 10)

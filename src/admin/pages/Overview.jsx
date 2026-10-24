@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertTriangle,
@@ -14,12 +14,15 @@ import {
   Newspaper,
   Upload,
   Info,
+  Database,
+  MessageSquare,
   Landmark,
   Users,
 } from 'lucide-react'
 import { api } from '../api'
 import { useAuth } from '../AdminApp'
 import { PageHeader, Loading, ErrorState, useAsync } from '../ui'
+import { LineChart, BarChart, Donut, SplitBars, Legend } from '../charts'
 import '../overview.css'
 
 // SQL timestamps are UTC "YYYY-MM-DD HH:MM:SS".
@@ -90,6 +93,11 @@ export default function Overview() {
               />
             </dl>
           </section>
+
+          <div className="ov-grid2">
+            <ContentStatus data={data} />
+            <MessagesTrend data={data} />
+          </div>
 
           <div className="ov-columns">
             <section className="a-card ov-section" aria-labelledby="ov-recent">
@@ -180,6 +188,12 @@ function ActivityIcon({ kind }) {
 // Things worth doing, each derived from the stored records.
 function Attention({ data }) {
   const items = []
+  if (data.persistentStorage === false)
+    items.push({
+      tone: 'warn',
+      text: 'This deployment keeps data in temporary server storage, so counts and uploads can reset when the server restarts. Numbers here only cover data saved since then. Connect a permanent database before relying on them.',
+      icon: Database,
+    })
   if (data.mustChangePassword)
     items.push({ tone: 'warn', text: 'You’re still using the initial password. Change it before the site goes public.', to: 'account', action: 'Change password' })
   if (data.openPrivacyRequests)
@@ -231,14 +245,90 @@ function Attention({ data }) {
       <ul>
         {items.map((it) => (
           <li key={it.text} className={`ov-attention__item ov-attention__item--${it.tone}`}>
-            {it.tone === 'warn' ? <AlertTriangle aria-hidden="true" /> : <Info aria-hidden="true" />}
+            {it.icon ? <it.icon aria-hidden="true" /> : it.tone === 'warn' ? <AlertTriangle aria-hidden="true" /> : <Info aria-hidden="true" />}
             <span>{it.text}</span>
-            <Link to={`/admin/dashboard/${it.to}`} className="a-btn a-btn--sm a-btn--ghost">
-              {it.action}
-            </Link>
+            {it.to && (
+              <Link to={`/admin/dashboard/${it.to}`} className="a-btn a-btn--sm a-btn--ghost">
+                {it.action}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+
+// --- Content & messages charts --------------------------------------------------
+const PUBLISH_PARTS = [
+  { key: 'live', label: 'Published', color: 'var(--s1)' },
+  { key: 'hidden', label: 'Not published', color: 'var(--neutral)' },
+]
+
+function ContentStatus({ data }) {
+  const rows = [
+    { label: 'Albums', live: data.publishedAlbums, hidden: data.albums - data.publishedAlbums },
+    { label: 'Photos', live: data.publicPhotos, hidden: data.photos - data.publicPhotos },
+    { label: 'News items', live: data.publishedNews, hidden: data.news - data.publishedNews },
+    { label: 'FOI posts', live: data.publishedFoi, hidden: data.foi - data.publishedFoi },
+  ]
+  return (
+    <section className="a-card ov-panel" aria-labelledby="ov-status">
+      <div className="ov-panel__head">
+        <h2 id="ov-status" className="a-h2">
+          What visitors can see
+        </h2>
+        <Legend series={PUBLISH_PARTS} />
+      </div>
+      <SplitBars rows={rows} parts={PUBLISH_PARTS} />
+    </section>
+  )
+}
+
+function MessagesTrend({ data }) {
+  const weekly = data.messagesWeekly || []
+  const total = weekly.reduce((s, w) => s + w.messages, 0)
+  const topics = data.messageTopics || []
+  const maxTopic = Math.max(1, ...topics.map((t) => t.n))
+  return (
+    <section className="a-card ov-panel" aria-labelledby="ov-msgs">
+      <div className="ov-panel__head">
+        <h2 id="ov-msgs" className="a-h2">
+          Contact messages
+        </h2>
+        <span className="ov-panel__meta">
+          <MessageSquare aria-hidden="true" /> {num(total)} in the last 12 weeks
+        </span>
+      </div>
+      <p className="ov-chart__title">Messages per week</p>
+      <BarChart
+        bars={weekly.map((w) => ({
+          label: dayLabel(w.week),
+          tipLabel: `Week of ${dayLabel(w.week, { month: 'short', day: 'numeric', year: 'numeric' })}`,
+          value: w.messages,
+        }))}
+        color="var(--s2)"
+        unit="messages"
+        height={160}
+        ariaLabel={`Bar chart of contact messages per week for the last 12 weeks, ${total} in total.`}
+      />
+      {topics.length > 0 && (
+        <div className="ov-breakdown ov-topics">
+          <h3>By topic (all stored messages)</h3>
+          <ul>
+            {topics.map((t) => (
+              <li key={t.topic}>
+                <span className="ov-breakdown__label">{t.topic}</span>
+                <span className="ov-breakdown__value">{num(t.n)}</span>
+                <span className="ov-breakdown__bar" aria-hidden="true">
+                  <span style={{ width: `${(t.n / maxTopic) * 100}%`, background: 'var(--s2)' }} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   )
 }
@@ -252,14 +342,23 @@ const ACTION_LABELS = {
   phone: 'Phone number taps',
   foi: 'FOI documents opened',
 }
-const DEVICE_LABELS = { mobile: 'Phone', tablet: 'Tablet', desktop: 'Computer' }
+const DEVICES = [
+  { key: 'mobile', label: 'Phone', color: 'var(--s1)' },
+  { key: 'desktop', label: 'Computer', color: 'var(--s2)' },
+  { key: 'tablet', label: 'Tablet', color: 'var(--s3)' },
+]
+const TREND_SERIES = [
+  { key: 'views', label: 'Page views', unit: 'page views', color: 'var(--s1)', shape: 'line' },
+  { key: 'visitors', label: 'Visitors', unit: 'visitors', color: 'var(--s2)', shape: 'line' },
+]
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function Change({ current, previous, range }) {
-  if (!previous) return <dd className="ov-change">{current ? `No data for the ${range} days before` : ' '}</dd>
+  if (!previous) return <dd className="ov-change">{current ? `No data for the ${range} days before` : ' '}</dd>
   const pct = Math.round(((current - previous) / previous) * 100)
   const Icon = pct >= 0 ? ArrowUpRight : ArrowDownRight
   return (
-    <dd className="ov-change">
+    <dd className={`ov-change ${pct >= 0 ? 'is-up' : 'is-down'}`}>
       <Icon aria-hidden="true" /> {pct >= 0 ? '+' : ''}
       {pct}% vs previous {range} days
     </dd>
@@ -279,7 +378,7 @@ function VisitStats() {
             Website visits
           </h2>
           <p className="a-muted">
-            {shown ? `${dayLabel(shown.from, { month: 'short', day: 'numeric', year: 'numeric' })} – today` : ' '}
+            {shown ? `${dayLabel(shown.from, { month: 'short', day: 'numeric', year: 'numeric' })} – today` : ' '}
           </p>
         </div>
         <div className="a-seg" role="group" aria-label="Time range">
@@ -307,6 +406,11 @@ function VisitStats() {
               <Change current={shown.views} previous={shown.previous.views} range={shown.range} />
             </div>
             <div>
+              <dt>Pages per visitor</dt>
+              <dd>{shown.visitors ? (shown.views / shown.visitors).toFixed(1) : '–'}</dd>
+              <dd className="ov-change">average in this period</dd>
+            </div>
+            <div>
               <dt>Today</dt>
               <dd>{num(shown.today.visitors)}</dd>
               <dd className="ov-change">
@@ -324,28 +428,61 @@ function VisitStats() {
             <div className="ov-empty">
               <Info aria-hidden="true" />
               <p>
-                No visits recorded yet. Counting starts when people open the public website. Your own visits aren’t
-                counted while you’re signed in.
+                No visits recorded yet. Counting starts when people open the public website and allow statistics in
+                their privacy choices. Your own visits aren’t counted while you’re signed in.
               </p>
             </div>
           ) : (
             <>
-              <DailyChart daily={shown.daily} />
+              <figure className="ov-chart">
+                <div className="ov-panel__head">
+                  <figcaption className="ov-chart__title">Daily traffic</figcaption>
+                  <Legend series={TREND_SERIES} />
+                </div>
+                <LineChart
+                  points={shown.daily.map((d) => ({
+                    ...d,
+                    label: dayLabel(d.day),
+                    tipLabel: dayLabel(d.day, { weekday: 'short', month: 'short', day: 'numeric' }),
+                  }))}
+                  series={TREND_SERIES}
+                  ariaLabel="Line chart of page views and visitors per day. The table below lists the same numbers."
+                />
+                <DailyTable daily={shown.daily} />
+              </figure>
+
               <div className="ov-breakdowns">
+                <div className="ov-breakdown">
+                  <h3>Devices</h3>
+                  <Donut
+                    slices={DEVICES.map((d) => ({
+                      ...d,
+                      value: shown.devices.find((x) => x.device === d.key)?.visitors || 0,
+                    }))}
+                    unit="visitors"
+                  />
+                </div>
+                <div className="ov-breakdown">
+                  <h3>Busiest days of the week</h3>
+                  <BarChart
+                    bars={weekdayAverages(shown.daily).map((w) => ({ label: w.label, tipLabel: `${w.label} (average)`, value: w.value }))}
+                    color="var(--s3)"
+                    unit="visitors per day"
+                    height={150}
+                    labelEvery={1}
+                    ariaLabel="Bar chart of average visitors per weekday."
+                  />
+                </div>
                 <Breakdown
                   title="Where visitors came from"
                   rows={shown.referrers.map((r) => ({ label: r.source || 'Direct or unknown', value: r.views }))}
                   unit="views"
                 />
                 <Breakdown
-                  title="Devices"
-                  rows={shown.devices.map((d) => ({ label: DEVICE_LABELS[d.device] || d.device, value: d.visitors }))}
-                  unit="visitors"
-                />
-                <Breakdown
                   title="Clicks on links"
                   rows={Object.entries(ACTION_LABELS).map(([k, label]) => ({ label, value: shown.actions[k] }))}
                   unit="clicks"
+                  color="var(--s4)"
                   keepZero
                 />
               </div>
@@ -355,8 +492,7 @@ function VisitStats() {
             Only visitors who allowed statistics in their privacy choices are counted, so these numbers are lower than
             actual visits. Counted on this server without cookies or stored IP addresses. A visitor is counted once per
             day, so “Visitors” adds up daily visitors. Bots, browsers with Do Not Track, and signed-in admins aren’t
-            counted.
-            Days follow {shown.timeZone.replace('_', ' ')} time.
+            counted. Days follow {shown.timeZone.replace('_', ' ')} time.
           </p>
         </div>
       )}
@@ -364,7 +500,19 @@ function VisitStats() {
   )
 }
 
-function Breakdown({ title, rows, unit, keepZero }) {
+// Average visitors per weekday over the selected range (each weekday's total
+// divided by how many of that weekday the range contains).
+function weekdayAverages(daily) {
+  const sums = WEEKDAYS.map(() => ({ total: 0, days: 0 }))
+  for (const d of daily) {
+    const i = (new Date(`${d.day}T12:00:00Z`).getUTCDay() + 6) % 7
+    sums[i].total += d.visitors
+    sums[i].days++
+  }
+  return WEEKDAYS.map((label, i) => ({ label, value: sums[i].days ? Math.round((sums[i].total / sums[i].days) * 10) / 10 : 0 }))
+}
+
+function Breakdown({ title, rows, unit, keepZero, color }) {
   const list = keepZero ? rows : rows.filter((r) => r.value > 0)
   const max = Math.max(1, ...list.map((r) => r.value))
   return (
@@ -381,7 +529,7 @@ function Breakdown({ title, rows, unit, keepZero }) {
                 {num(r.value)} <span className="visually-hidden">{unit}</span>
               </span>
               <span className="ov-breakdown__bar" aria-hidden="true">
-                <span style={{ width: `${(r.value / max) * 100}%` }} />
+                <span style={{ width: `${(r.value / max) * 100}%`, ...(color && { background: color }) }} />
               </span>
             </li>
           ))}
@@ -391,134 +539,30 @@ function Breakdown({ title, rows, unit, keepZero }) {
   )
 }
 
-function niceMax(v) {
-  if (v <= 4) return 4
-  const step = 10 ** Math.floor(Math.log10(v))
-  for (const m of [1, 2, 2.5, 5, 10]) if (m * step >= v) return m * step
-  return 10 * step
-}
-
-// One series (daily visitors) as bars; the tooltip adds page views.
-function DailyChart({ daily }) {
-  const wrapRef = useRef(null)
-  const [width, setWidth] = useState(0)
-  const [active, setActive] = useState(null)
-
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
-  const height = 190
-  const pad = { top: 10, right: 4, bottom: 26, left: 34 }
-  const plotW = Math.max(0, width - pad.left - pad.right)
-  const plotH = height - pad.top - pad.bottom
-  const list = daily || []
-  const max = niceMax(Math.max(0, ...list.map((d) => d.visitors || 0)))
-  const ticks = [0, max / 2, max]
-  const slot = list.length ? plotW / list.length : 0
-  const gap = slot > 8 ? 2 : 1
-  const barW = Math.max(1, slot - gap)
-  const y = (v) => pad.top + plotH - (v / max) * plotH
-  const labelIdx = list.length ? [...new Set([0, Math.floor((list.length - 1) / 2), list.length - 1])] : []
-  const a = active == null ? null : list[active]
-
+function DailyTable({ daily }) {
   return (
-    <figure className="ov-chart">
-      <figcaption className="ov-chart__title">Visitors per day</figcaption>
-      <div className="ov-chart__plot" ref={wrapRef} onMouseLeave={() => setActive(null)}>
-        {width > 0 && (
-          <svg width={width} height={height} role="img" aria-label="Bar chart of visitors per day. The table below lists the same numbers.">
-            {ticks.map((t) => (
-              <g key={t}>
-                <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} className="ov-chart__grid" />
-                <text x={pad.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="ov-chart__axis">
-                  {num(t)}
-                </text>
-              </g>
-            ))}
-            {list.map((d, i) => {
-              const x = pad.left + i * slot + gap / 2
-              const h = Math.max(0, (d.visitors / max) * plotH)
-              const r = Math.min(4, barW / 2, h)
-              const top = pad.top + plotH - h
-              return (
-                <g key={d.day}>
-                  {h > 0 && (
-                    <path
-                      className={active === i ? 'ov-chart__bar is-active' : 'ov-chart__bar'}
-                      d={`M${x},${top + h} V${top + r} Q${x},${top} ${x + r},${top} H${x + barW - r} Q${x + barW},${top} ${x + barW},${top + r} V${top + h} Z`}
-                    />
-                  )}
-                  <rect
-                    x={pad.left + i * slot}
-                    y={pad.top}
-                    width={slot}
-                    height={plotH}
-                    fill="transparent"
-                    onMouseEnter={() => setActive(i)}
-                    onTouchStart={() => setActive(i)}
-                  />
-                </g>
-              )
-            })}
-            {labelIdx.map((i) => list[i] ? (
-              <text
-                key={i}
-                x={pad.left + i * slot + slot / 2}
-                y={height - 6}
-                textAnchor={i === 0 ? 'start' : i === list.length - 1 ? 'end' : 'middle'}
-                className="ov-chart__axis"
-              >
-                {dayLabel(list[i].day)}
-              </text>
-            ) : null)}
-          </svg>
-        )}
-        {a && (
-          <div
-            className="ov-chart__tip"
-            style={{
-              left: Math.min(Math.max(pad.left + active * slot + slot / 2, 70), width - 70),
-              top: Math.max(0, y(a.visitors) - 8),
-            }}
-          >
-            <strong>{dayLabel(a.day, { weekday: 'short', month: 'short', day: 'numeric' })}</strong>
-            <span>
-              {num(a.visitors)} visitor{a.visitors === 1 ? '' : 's'}
-            </span>
-            <span>
-              {num(a.views)} page view{a.views === 1 ? '' : 's'}
-            </span>
-          </div>
-        )}
-      </div>
-      <details className="ov-chart__table">
-        <summary>Show as a table</summary>
-        <div className="ov-chart__scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Day</th>
-                <th scope="col">Visitors</th>
-                <th scope="col">Page views</th>
+    <details className="ov-chart__table">
+      <summary>Show as a table</summary>
+      <div className="ov-chart__scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">Visitors</th>
+              <th scope="col">Page views</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...daily].reverse().map((d) => (
+              <tr key={d.day}>
+                <th scope="row">{dayLabel(d.day, { weekday: 'short', month: 'short', day: 'numeric' })}</th>
+                <td>{num(d.visitors)}</td>
+                <td>{num(d.views)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {[...daily].reverse().map((d) => (
-                <tr key={d.day}>
-                  <th scope="row">{dayLabel(d.day, { weekday: 'short', month: 'short', day: 'numeric' })}</th>
-                  <td>{num(d.visitors)}</td>
-                  <td>{num(d.views)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
-    </figure>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
   )
 }

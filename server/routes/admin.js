@@ -8,7 +8,7 @@ import { storeImage, removeImageFiles } from '../images.js'
 import { albumsWithPhotos, newsItems, foiPosts } from './public.js'
 import { storeDocument, removeDocument, ACCEPTED_DOCUMENTS } from '../documents.js'
 import { text, done, ids } from '../validate.js'
-import { visitStats } from '../stats.js'
+import { visitStats, dayOf, shiftDay } from '../stats.js'
 import { mailEnabled } from '../mailer.js'
 import { audit } from '../security.js'
 import { NEWS_TAGS, FOI_CATEGORIES } from '../../src/data/siteDefaults.js'
@@ -66,7 +66,27 @@ router.get('/overview', (req, res) => {
     .sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0))
     .slice(0, 8)
 
+  // Contact messages per week (weeks start on Monday, in the statistics time
+  // zone), counted from the stored rows for the last 12 weeks.
+  const WEEKS = 12
+  const today = dayOf()
+  const weekday = (new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7
+  const firstWeek = shiftDay(today, -weekday - (WEEKS - 1) * 7)
+  const weekly = Array.from({ length: WEEKS }, (_, i) => ({ week: shiftDay(firstWeek, i * 7), messages: 0 }))
+  for (const { at } of db.prepare("SELECT created_at AS at FROM messages WHERE created_at >= datetime('now', '-90 days')").all()) {
+    const day = dayOf(new Date(`${at.replace(' ', 'T')}Z`))
+    const i = Math.floor((Date.parse(`${day}T12:00:00Z`) - Date.parse(`${firstWeek}T12:00:00Z`)) / (7 * 86400000))
+    if (i >= 0 && i < WEEKS) weekly[i].messages++
+  }
+
   res.json({
+    // Vercel keeps the database in temporary storage that is reset when the
+    // server restarts and isn't shared between instances.
+    persistentStorage: !config.isVercel,
+    dataSince: db.prepare('SELECT MIN(created_at) AS at FROM users').get().at,
+    messagesWeekly: weekly,
+    messageTopics: db.prepare('SELECT topic, COUNT(*) AS n FROM messages GROUP BY topic ORDER BY n DESC, topic').all(),
+    privacyRequests: count('SELECT COUNT(*) AS n FROM privacy_requests'),
     albums: count('SELECT COUNT(*) AS n FROM albums'),
     publishedAlbums: count('SELECT COUNT(*) AS n FROM albums WHERE published = 1'),
     emptyAlbums: count('SELECT COUNT(*) AS n FROM albums a WHERE NOT EXISTS (SELECT 1 FROM photos p WHERE p.album_id = a.id)'),
